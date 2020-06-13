@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>房产信息查询系统</title>
+    <link rel="stylesheet" href="layui/css/layui.css">
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header">
+        <div class="layui-logo">房产信息查询系统</div>
+        <ul class="layui-nav layui-layout-right">
+            <li class="layui-nav-item">
+                <a href="javascript:;">
+                    <img src="//oss.aliyuncs.com/aliyun_id_photo_bucket/default_trade.jpg" class="layui-nav-img">
+                    <span id="userName"></span>
+
+                </a>
+            </li>
+            <li class="layui-nav-item"><a href="/loginOut.do">退出</a></li>
+        </ul>
+
+    </div>
+
+    <div class="layui-side layui-bg-black">
+        <div class="layui-side-scroll">
+            &lt;!&ndash; 左侧导航区域（可配合layui已有的垂直导航） &ndash;&gt;
+            <ul id="menu" class="layui-nav layui-nav-tree" lay-filter="test">
+                <li class="layui-nav-item"><a href="listHouse.html" target="myframe">操作信息</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="layui-body">
+        <!-- 内容主体区域 -->
+        <iframe name="myframe" width="100%" height="100%">
+
+        </iframe>
+    </div>
+
+    <div class="layui-footer">
+        &lt;!&ndash; 房产查询系统 &ndash;&gt;
+        © wangjintao.com - 版权所属:包租婆
+    </div>
+</div>
+<script src="layui/layui.js"></script>
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script>
+
+
+    //JavaScript代码区域
+    layui.use(['element', "layer"], function () {
+        var element = layui.element;
+        var layer = layui.layer;
+        $.ajax({
+            type: "get",
+            url: "query.do",
+            dataType: "json",
+            success: function (data) {
+                if (data.code == 1) {
+                    $("#userName").html(data.info.userName)
+                    $("img").attr("src", data.info.imgPath)
+                } else {
+                    layer.msg("获取数据异常")
+                }
+            }
+        })
+    });
+</script>
+</body>
+</html>
+
+<script>
+    function updateHead() {
+        $.ajax({
+            type: "get",
+            url: "user/query.do",
+            dataType: "json",
+            success: function (data) {
+                if (data.code == 1) {
+                    $("img").attr("src", data.info.imgPath)
+                }
+            }
+        })
+    }
+</script>
+<script>
+    function out(){
+    $.ajax({
+        type:"post",
+        url:"loginOut.do",
+        data:data.field,
+        dataType:"json",
+        success:function(data){
+            if(data.code == 1){
+                window.location.href = "login.html";
+            }
+        }
+    })
+
+    return false;
+    }
+</script>
+</html>

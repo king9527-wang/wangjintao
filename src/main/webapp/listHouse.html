@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<link rel="stylesheet" href="layui/css/layui.css" />
+		<script type="text/javascript" src="layui/layui.js" ></script>
+		<script type="text/javascript" src="js/jquery.min.js" ></script>
+	</head>
+	<body class="layui-layout-body">
+    <div class="layui-layout layui-layout-admin">
+        <div class="layui-row layui-bg-gray" style="height: 100px">
+            <div class="layui-col-md2">
+            </div>
+            <div class="layui-col-md10">
+                <span style="font-size: xx-large; color: #393D49; margin-left: 55px; top: 30%">房产信息</span>
+            </div>
+        </div>
+
+        <blockquote class="layui-elem-quote quoteBox">
+            <form class="layui-form">
+                <div class="layui-inline">
+                    <a class="layui-btn layui-btn-normal addVideo_btn">添加</a>
+                </div>
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <input type="text" id="searchInfo" name="searchInfo" class="layui-input searchVal" placeholder="请输入搜索的内容" />
+                    </div>
+                    <a class="layui-btn search_btn" id="searchFor" data-type="reload">查询</a>
+                </div>
+
+            </form>
+        </blockquote>
+        <table class="layui-hide" id="demoVideo" lay-filter="demoVideo"></table>
+
+        <script type="text/html" id="barUpdate">
+            <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+            <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+        </script>
+</div>
+        <script>
+            layui.use(['laypage','form','layer','table','element','slider'],function(){
+                var laypage = layui.laypage
+                    ,layer = layui.layer
+                    ,table = layui.table
+                    ,element = layui.element
+                    ,slider = layui.slider
+                    ,form = layui.form
+                    ,$ = layui.$
+           // }
+                InitForm();
+
+                table.render({
+                    elem:'#demoVideo'
+                    ,id:'myVideo'
+                    ,height:350
+                    ,url:'listInfo.do'
+                    ,page:{
+                        layout:['limit','count','prev','page','next','skip']
+                        ,groups:5
+                        ,first:false
+                        ,last:false
+                        ,limit:5
+                        ,limits:[5,8,10,15]
+                    }
+                    
+                    ,cols:[[
+                        {type: "checkbox", width:10}
+                        ,{field:'id',title:'序号',width:60,align:"center"}
+                        ,{field:'projectName',title:'项目名称',width:150,align:"center"}
+                        ,{field:'vested',title:'产权人',width:150,align:"center"}
+                        ,{field:'idCard',title:'身份证号',width:80,align:"center"}
+                        ,{field:'housingTypes',title:'房屋类型',width:140,align:"center"}
+                        ,{field:'usableArea',title:'使用面积',width:120,align:"center"}
+                        ,{field: 'constructionTime', title:'建造时间',width: 197, align:'center'}
+                        , {fixed: 'right', title: '操作', width: 165, align: 'center', toolbar: '#barUpdate'}
+                    ]]
+                });
+
+                $ = layui.jquery, active = {
+                    reload: function () {
+                        var searchInfo = $("#searchInfo").val();
+                       /* var speakerId = $("#speakerIuserd option:selected").val();
+                        var courseId = $("#courseId option:selected").val();*/
+                        table.reload('myVideo', {
+                            page:{
+                                curr:1
+                            },
+                            where: {page: 1, searchInfo: searchInfo}
+                        });
+                    }
+                };
+
+
+
+                table.on('tool(demoVideo)',function (obj) {
+                    var data = obj.data
+                        ,layEven = obj.event;
+
+                    if (layEven == 'del') {
+                        layer.confirm('真的要删除行吗', function (index) {
+                            obj.del();
+                            layer.close(index);
+                            $.ajax({
+                                type:"get",
+                                url:"deleteInfo.do",
+                                data:{id:data.id},
+                                dataType:"json",
+                                success:function (data) {
+                                    if (data.code == 1) {
+                                        layer.msg("删除成功!", {
+                                            icon: 6,
+                                            time: 500
+                                        }, function () {
+                                            table.reload('myVideo');// 重新加载页面,demo 表示父窗体table标签的id值
+                                        });
+                                    }else {
+                                        alert(data.info)
+                                    }
+                                }
+                            })
+                        })
+                    }else if (layEven == 'edit') {
+                        layer.open({
+                            type: 2 //此处以iframe举例
+                            , title: '修改员工'
+                            , area: ['900px','500px']
+                            , content: 'updateInfo.html?id='+data.id
+                        });
+                    }
+                });
+
+                //下拉初始化
+                function InitForm(){
+                    $.ajax({
+                        type: 'post',
+                        url: 'findSAC.do',
+                        dataType: 'json',
+                        success: function(responseM){
+                            if(responseM.course.length > 0){
+                                //加载班级
+                                var clazzName = $("#clazzNameHide").val();
+                                for(var i = 0;i < responseM.course.length; i++){
+                                    var name = responseM.course[i].course_title;
+                                    var value = responseM.course[i].id;
+                                    if(clazzName == name){
+                                        $(".clazzName").append('<option value="'+value+'" selected="">'+name+'</option>');
+                                    }else{
+                                        $(".clazzName").append('<option value="'+value+'">'+name+'</option>');
+                                    }
+                                }
+                                //加载
+                                var tName = $("#tNameHide").val();
+                                for(var i = 0;i < responseM.speaker.length; i++){
+                                    var name = responseM.speaker[i].speaker_name;
+                                    var value = responseM.speaker[i].id;
+                                    if(tName == name){
+                                        $(".tName").append('<option value="'+value+'" selected="">'+name+'</option>');
+                                    }else{
+                                        $(".tName").append('<option value="'+value+'">'+name+'</option>');
+                                    }
+                                }
+
+                                form.render('select');
+                            }else{
+                                layer.msg("下拉数据加载失败...");
+                            }
+                        }
+                    })
+                };
+
+                $(".addVideo_btn").click(function () {
+                    var layer = layui.layer;
+                    layer.open({
+                        type:2,
+                        title:'添加房产信息',
+                        shade: 0.8,
+                        url:"addVideo.do",
+                        area:['900px','500px'],
+                        content:'addInfo.html'
+                    });
+
+                })
+
+
+
+                $(".delAll_btn").click(function () {
+                    var checkStatus = table.checkStatus('myVideo'),
+                        data = checkStatus.data;
+
+                    if (data.length > 0) {
+                        var ids = "";
+                        for (var i = 0; i<data.length; i++) {
+                            ids += data[i].id + ",";
+                        }
+                        ids = ids.substring(0,ids.length - 1);
+                        layer.confirm('确定删除选中的信息？',{icon: 3,title:'提示信息'},
+                            function (index) {
+                                $.ajax({
+                                    type:"get",
+                                    url:"deleteSomeVideo.do",
+                                    data:{string:ids},
+                                    dataType:"json",
+                                    success:function (data) {
+                                        if (data.code == 1) {
+                                            layer.msg("删除成功!", {
+                                                icon: 6,
+                                                time: 500
+                                            }, function () {
+                                                window.location.reload();// 重新加载页面,demo 表示父窗体table标签的id值
+                                                layer.close(index);
+                                            });
+                                        }else {
+                                            layer.msg("删除失败");
+                                        }
+                                    }
+                                })
+                            })
+                    }else {
+                        layer.msg("请选择需要删除的班级");
+                    }
+                })
+
+
+
+                $('#searchFor').on('click', function () {
+                    var type = $(this).data('type');
+                    active[type] ? active[type].call(this) : '';
+                });
+
+            })
+
+        </script>
+</body>
+</html>

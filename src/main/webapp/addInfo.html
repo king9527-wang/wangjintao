@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="layui/css/layui.css"  media="all">
+    <link rel="stylesheet" href="layui/css/layui.css" />
+    <script type="text/javascript" src="layui/layui.js" ></script>
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+</head>
+<body>
+<form class="layui-form" action="">
+    <div class="layui-form-item">
+        <label class="layui-form-label">项目名称</label>
+        <div class="layui-input-block">
+            <input type="text" name="projectName" lay-verify="title" placeholder="请输入项目名称" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+
+    <div class="layui-form-item layui-form-text">
+        <label class="layui-form-label">产权人</label>
+        <div class="layui-input-block">
+            <textarea placeholder="请输入产权人" class="layui-textarea" name="vested" type=""></textarea>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">身份证号</label>
+        <div class="layui-input-block">
+            <input type="text" name="idCard" lay-verify="video_url" placeholder="" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">房屋类型</label>
+        <div class="layui-input-block">
+            <input type="text" name="housingTypes" lay-verify="video_url" placeholder="" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+
+   <!-- <div class="layui-form-item">
+        <label class="layui-form-label">房屋类型</label>
+        <div class="layui-input-block">
+        <select name="HousingType" id="tNameHide" class="tName" lay-verify="required">
+            <option value="">三室...</option>
+        </select>
+        </div>
+    </div>-->
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">使用面积</label>
+        <div class="layui-input-block">
+            <input type="text" name="usableArea" lay-verify="video_url" placeholder="请输入使用面积" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">建造时间</label>
+        <div class="layui-input-block">
+            <input type="date" name="constructionTime" lay-verify="image_url" placeholder="" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button class="layui-btn" lay-submit="" lay-filter="addOne">立即提交</button>
+            <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+        </div>
+    </div>
+</form>
+
+<script>
+    layui.use(['form','layedit','laydate'],function () {
+        var form = layui.form
+            ,layer = layui.layer
+            ,layedit = layui.layedit
+            ,laydate = layui.laydate;
+
+        InitForm();
+
+
+        form.on('submit(addOne)',function (data) {
+            $.ajax({
+                type:"post",
+                url:"addInfo.do",
+                data:data.field,
+                dataType:"json",
+                success:function (data) {
+                    if (data.code == 1) {
+                        layer.msg("添加成功!", {
+                            icon: 6,
+                            time: 500
+                        }, function () {
+                            var t = parent.layui.table;
+                            window.location.reload();// 重新加载页面,demo 表示父窗体table标签的id值
+                            var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+                            parent.layer.close(index); //再执行关闭
+                        });
+                    } else {
+                        layer.msg(data.info);
+                    }
+                }
+            });
+            return false;
+        });
+
+        //下拉初始化
+        function InitForm(){
+            $.ajax({
+                type: 'post',
+                url: 'findSAC.do',
+                dataType: 'json',
+                success: function(responseM){
+                    if(responseM.course.length > 0){
+                        //加载班级
+                        var clazzName = $("#clazzNameHide").val();
+                        for(var i = 0;i < responseM.course.length; i++){
+                            var name = responseM.course[i].course_title;
+                            var value = responseM.course[i].id;
+                            if(clazzName == name){
+                                $(".clazzName").append('<option value="'+value+'" selected="">'+name+'</option>');
+                            }else{
+                                $(".clazzName").append('<option value="'+value+'">'+name+'</option>');
+                            }
+                        }
+                        //加载教师
+                        var tName = $("#tNameHide").val();
+                        for(var i = 0;i < responseM.speaker.length; i++){
+                            var name = responseM.speaker[i].speaker_name;
+                            var value = responseM.speaker[i].id;
+                            if(tName == name){
+                                $(".tName").append('<option value="'+value+'" selected="">'+name+'</option>');
+                            }else{
+                                $(".tName").append('<option value="'+value+'">'+name+'</option>');
+                            }
+                        }
+
+                        form.render('select');
+                    }else{
+                        layer.msg("下拉数据加载失败...");
+                    }
+                }
+            })
+        };
+
+
+    })
+</script>
+
+</body>
+</html>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.qfedu.wjt.dao.UserDao">
+    <select id="findByName" parameterType="string" resultType="user">
+        select * from user where userName = #{userName}
+    </select>
+
+
+    <select id="findAll" resultType="com.qfedu.wjt.pojo.Info">
+        select * from info
+        <where>
+            <if test="searchInfo != null">
+                projectName like "%${searchInfo}%"
+            </if>
+        </where>
+    </select>
+
+    <select id="findById" parameterType="int" resultType="com.qfedu.wjt.pojo.Info">
+        select * from info where id=#{id};
+    </select>
+
+    <delete id="deleteInfo" parameterType="int">
+        delete from info where id=#{id}
+    </delete>
+
+    <insert id="addInfo" parameterType="com.qfedu.wjt.pojo.Info">
+        insert into info (projectName,vested,idCard,housingTypes,usableArea,constructionTime)
+        values(#{projectName},#{vested},#{idCard},#{housingTypes},#{usableArea},#{constructionTime})
+    </insert>
+
+    <update id="updateInfo" parameterType="com.qfedu.wjt.pojo.Info">
+        update info
+        set projectName = #{projectName},vested = #{vested},
+            idCard = #{idCard},housingTypes = #{housingTypes},
+            usableArea = #{usableArea}, constructionTime = #{constructionTime}
+        where id=#{id}
+    </update>
+
+    <insert id="addRegisterInfo" parameterType="com.qfedu.wjt.pojo.User">
+        insert into user (userName,passWord)
+        values(#{userName},#{passWord})
+    </insert>
+
+    <update id="updatePassword" parameterType="com.qfedu.wjt.pojo.User">
+        update user set passWord=#{passWord} where userName=#{userName}
+    </update>
+
+    <select id="findByUser" parameterType="string" resultType="com.qfedu.wjt.pojo.User">
+    select * from user where userName=#{userName}
+</select>
+
+</mapper>
